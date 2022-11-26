@@ -145,7 +145,7 @@ const Home = () => {
                     <section className="max-h-80 overflow-y-scroll">
                     {data.map((data, index) => {
                         return (
-                            <article className="bg-white flex justify-between items-center m-2 px-5">
+                            <article key={index} className="bg-white flex justify-between items-center m-2 px-5">
                                 <div className="text-left">
                                     <p className="text-lg">{data.name}</p>
                                     <p className="text-sm font-bold text-[#788896]">
