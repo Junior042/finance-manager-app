@@ -1,14 +1,15 @@
 import React from "react";
 import "../../index.css";
 
-const Input = ({ registerValue, objNameValueInput, placeHolder }: any) => {
+const Input = ({ registerValue, objNameValueInput, placeHolder, typeInput, maxValues }: any) => {
     return (
         <>
             <input
-                type="text"
+                type={typeInput}
+                maxLength={maxValues}
                 placeholder={placeHolder}
-                {...registerValue(objNameValueInput)}
-                className="px-2 py-2 text-black rounded-md border-gray-400 border-2 bg-white px-2 placeholder:font-semibold placeholder:opacity-[.6]"
+                {...registerValue(objNameValueInput, {maxLength: maxValues })}
+                className="px-2 py-2 text-black rounded-md border-gray-400 border-2 bg-white placeholder:font-semibold placeholder:opacity-[.6]"
             />
         </>
     );
