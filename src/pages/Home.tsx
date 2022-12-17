@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
+import ModalNewDeposit from './ModalNewDeposit';
+import ModalNewExpense from "./ModalNewExpense";
+import ModalNewFontExpense from './ModalNewFontExpense';
 const data = [
     {
         name: "Energia",
@@ -75,6 +78,9 @@ const data = [
 ];
 
 const Home = () => {
+    const [ statusModal, setModal ] = useState(false);
+    const [ statusModalNewFontExpense, setModalNewFontExpense ] = useState(false);
+    const [ statusModalNewExpense, setModalNewExpense ] = useState(false);
 
     const displayValue = (data:any) => {
         if(data.typePayment === "deposito"){
@@ -96,7 +102,8 @@ const Home = () => {
             <header className="flex justify-between items-center">
                 <span className="flex  gap-3">
                     <h1 className="text-3xl font-bold">Despesas</h1>
-                    <button className="btn">+ Add New</button>
+                    <button className="btn" onClick={() => setModalNewExpense(true)}>+ Add New</button>
+                    <button className="btn" onClick={() => setModal(true)}>New Deposit</button>
                 </span>
                 <div className="flex gap-4">
                     <span>
@@ -124,7 +131,7 @@ const Home = () => {
                         <li className="text-lg font-bold text-black">Casa</li>
                         <li className="text-lg text-black">Entreterimento</li>
                     </ul>
-                    <button className="btn-no-border">+ Add New</button>
+                    <button className="btn-no-border" onClick={() => setModalNewFontExpense(true)}>+ Add New</button>
                 </aside>
                 <section className="bg-[#e3e8ed] col-start-2 col-end-4 text-black">
                     <header className="bg-[#ced8e0] flex justify-between px-7 py-1">
@@ -157,30 +164,12 @@ const Home = () => {
                         );
                     })}
                     </section>
-                    {/* <article className="bg-white flex justify-between items-center m-2 px-5">
-                        <div className="text-left">
-                            <p className="text-lg">Energia</p>
-                            <p className="text-sm font-bold text-[#788896]">
-                                Jan 30, 2022
-                            </p>
-                        </div>
-                        <p className="mr-1 text-xl font-semibold text-red-500">
-                            - R$ 160,00
-                        </p>
-                    </article>
-                    <article className="bg-white flex justify-between items-center m-2 px-5">
-                        <div className="text-left">
-                            <p className="text-lg">Energia</p>
-                            <p className="text-sm font-bold text-[#788896]">
-                                Jan 30, 2022
-                            </p>
-                        </div>
-                        <p className="mr-1 text-xl font-semibold text-green-500">
-                            R$ 160,00
-                        </p>
-                    </article> */}
                 </section>
             </main>
+            
+            <ModalNewDeposit statusModal={statusModal} setStatusModal={setModal}/>
+            <ModalNewFontExpense statusModal={statusModalNewFontExpense} setStatusModal={setModalNewFontExpense}/>
+            <ModalNewExpense statusModal={statusModalNewExpense} setStatusModal={setModalNewExpense}/>
         </>
     );
 };

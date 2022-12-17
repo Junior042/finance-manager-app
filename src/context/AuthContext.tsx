@@ -2,20 +2,20 @@ import React, { createContext } from "react";
 import { useState } from "react";
 import { useEffect } from "react";
 import { Navigate } from "react-router-dom";
+import Login from "../pages/Login";
 import { api } from "../services/api";
 
 export const AuthContext = createContext<any>({});
 
 export const AuthProvider = ({ children }: any) => {
-    const [user, setUser] = useState<string | null>(null);
+    const [user, setUser] = useState<any | null>(null);
 
     useEffect(() => {
         const loadingStorageData = () => {
-            const storageUser = localStorage.getItem("@Auth:user");
             const storageToken = localStorage.getItem("@Auth:token");
 
             if (storageToken && storageToken) {
-                setUser(storageUser);
+                setUser(storageToken);
             }
         };
         loadingStorageData();
@@ -23,14 +23,14 @@ export const AuthProvider = ({ children }: any) => {
 
     const signIn = async ({ email, password }:any) => {
         try {
-            const response = await api.post("/auth", { email, password });
+            const response = await api.post("/login", { email, password });
             if (response.data.error) {
                 alert(response.data.error);
             } else {
-                setUser(response.data);
+                setUser(response.data.token);
+                
                 api.defaults.headers.Authotization = response.data.token; // coloca com header authorization padrão o token do usuário
 
-                localStorage.setItem('@Auth:user', JSON.stringify(response.data.user));
                 localStorage.setItem('@Auth:token', response.data.token);
             }
             

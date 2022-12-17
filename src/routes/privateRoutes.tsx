@@ -5,5 +5,6 @@ import { AuthContext } from "../context/AuthContext";
 
 export const PrivateRoute = () => {
   const { signed } = useContext(AuthContext);
+  
   return signed ? <Outlet /> : <Navigate to="/" />;
 };
