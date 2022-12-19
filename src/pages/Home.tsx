@@ -1,89 +1,83 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ModalNewDeposit from './ModalNewDeposit';
 import ModalNewExpense from "./ModalNewExpense";
 import ModalNewFontExpense from './ModalNewFontExpense';
-const data = [
-    {
-        name: "Energia",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "deposito",
-    },
-    {
-        name: "Energia 2",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "retirado",
-    },
-    {
-        name: "Energia 3",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "retirado",
-    },
-    {
-        name: "Energia",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "deposito",
-    },
-    {
-        name: "Energia 2",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "retirado",
-    },
-    {
-        name: "Energia 3",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "retirado",
-    },
-    {
-        name: "Energia",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "deposito",
-    },
-    {
-        name: "Energia 2",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "retirado",
-    },
-    {
-        name: "Energia 3",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "retirado",
-    },
-    {
-        name: "Energia",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "deposito",
-    },
-    {
-        name: "Energia 2",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "retirado",
-    },
-    {
-        name: "Energia 3",
-        createdAt: "Jan 30, 2022",
-        value: "160.00",
-        typePayment: "retirado",
-    },
-];
+import { api }  from '../services/api';
+import { getDataUser } from '../services/jwtFuncs';
+import jwt from 'jsonwebtoken';
+
+
+
+interface IDataUser {
+    balance: string;
+    cpf: string;
+    email: string;
+    name: string;
+    phone: string;
+    totalDeposited: string;
+    _id: string;
+};
+
+/*
+    "_id": "639ce51bee36e3d77fa10c3e",
+    "status": "Pending",
+    "value": "200.00",
+    "name": "Pagar Mentoria O Poder Da Internet",
+    "createdAt": "2022-12-16T21:37:31.512Z",
+    "description": "Conhecimento",
+    "user": "638b8f1d85e1d1be091eccfa",
+    "fontExpense": "6397a4718f4535b3468101fb"
+*/
 
 const Home = () => {
     const [ statusModal, setModal ] = useState(false);
     const [ statusModalNewFontExpense, setModalNewFontExpense ] = useState(false);
     const [ statusModalNewExpense, setModalNewExpense ] = useState(false);
 
+    const [ statusChanges, setStatusChanges ] = useState(true);
+    const [ loading, setLoading ] = useState(true);
+
+    const [ dataUser, setDataUser ] = useState<IDataUser | null>(null);
+    const [ dataFontExpense, setDataFontExpense ] = useState([]);
+    const [ dataExpense, setDataExpense ] = useState<Array<Object> | null>(null);
+
+    useEffect(() => {
+        // const tokenUserStorage: string | null = localStorage.getItem('@Auth:token');
+        const findDataUser = async () => {
+            setLoading(true);
+            // const sla = getDataUser('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzOGI4ZjFkODVlMWQxYmUwOTFlY2NmYSIsIm5hbWUiOiJFZHVhcmRvIEp1bmlvciIsImlhdCI6MTY3MTI5ODg5NywiZXhwIjoxNjcxMzg1Mjk3fQ.X4DE5nPpaY0BjHHMms1KriPitxq8FJAa7MctVqnbzW4')
+            try{
+                const dataUserApi = await api.get('/user/638b8f1d85e1d1be091eccfa');
+                setDataUser(dataUserApi.data.data);
+                setLoading(false);
+            }catch(e:any){
+                console.log(e.message);
+                if(e.message === "Network Error"){
+                    alert('Nossos serviços estão fora do ar... \nFavor volte mais tarde. \nNossa equipe agradeçe sua compreenção!');
+                }
+            }
+        }
+
+        const allFontExpenses = async () => { 
+            setLoading(true);
+            try{
+                const allFontExpenses = await api.get('/fontExpense/All?user=false&expenses=true');
+                setDataFontExpense(allFontExpenses.data.data);
+                setLoading(false);
+            }catch(e){
+                console.log('error => ', e);
+            }
+        }
+
+        // if(tokenUserStorage) findDataUser();
+        findDataUser();
+        allFontExpenses();
+    }, [statusChanges]);
+    
+    // dataUser && console.log(dataUser);
+
     const displayValue = (data:any) => {
-        if(data.typePayment === "deposito"){
+        if(data.status === "Paid"){
             return (
                 <p className="mr-1 text-xl font-semibold text-green-500">
                     + {data.value}
@@ -97,8 +91,27 @@ const Home = () => {
         )
     }
 
+    const readExpenses = async (id:string) => {
+        console.log(id);
+        setLoading(true);
+
+        try{
+            const allFontExpenses = await api.get(`/fontExpense/${id}`);
+            setDataExpense(allFontExpenses.data.data.expenses);
+            setLoading(false);
+            // console.log(allFontExpenses.data.data.expenses);
+            
+        }catch(e){
+            console.log('error => ', e);
+            alert('Error! \n Atualize a pagina, caso persiste contate o suporte.')
+        }
+    }
+
     return (
         <>
+            {
+                loading && (<p>Loading...</p>)
+            }
             <header className="flex justify-between items-center">
                 <span className="flex  gap-3">
                     <h1 className="text-3xl font-bold">Despesas</h1>
@@ -109,14 +122,14 @@ const Home = () => {
                     <span>
                         <p className="font-bold">
                             Saldo:{" "}
-                            <span className="text-green-400">R$: 3.900,90</span>
+                            <span className="text-green-400">R$: {dataUser? dataUser.balance: "00.00"}</span>
                         </p>
                     </span>
                     <span>
                         <p className="font-semibold">
                             Total já depositado:{" "}
                             <span className="text-green-400">
-                                R$: 10.949,00
+                                R$: {dataUser? dataUser.totalDeposited: "00.00"}
                             </span>
                         </p>
                     </span>
@@ -128,8 +141,13 @@ const Home = () => {
                         <p>Fonte das Despesas</p>
                     </header>
                     <ul>
-                        <li className="text-lg font-bold text-black">Casa</li>
-                        <li className="text-lg text-black">Entreterimento</li>
+                        {
+                            dataFontExpense && dataFontExpense.map((data: any, index) => {
+                                return <li key={index} className="text-lg text-black cursor-pointer" onClick={() => readExpenses(data._id)}>{data.name}</li>
+                            })
+                        }
+                        {/* <li className="text-lg font-bold text-black">Casa</li>
+                        <li className="text-lg text-black">Entreterimento</li> */}
                     </ul>
                     <button className="btn-no-border" onClick={() => setModalNewFontExpense(true)}>+ Add New</button>
                 </aside>
@@ -150,7 +168,7 @@ const Home = () => {
                         </div>
                     </header>
                     <section className="max-h-80 overflow-y-scroll">
-                    {data.map((data, index) => {
+                    {dataExpense ? dataExpense.map((data:any, index) => {
                         return (
                             <article key={index} className="bg-white flex justify-between items-center m-2 px-5">
                                 <div className="text-left">
@@ -162,7 +180,9 @@ const Home = () => {
                                 {displayValue(data)}
                             </article>
                         );
-                    })}
+                    }) : (
+                        <><p>Sem despesas...</p></>
+                    )}
                     </section>
                 </section>
             </main>

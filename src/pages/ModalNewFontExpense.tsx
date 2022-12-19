@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Input } from "../components";
 
