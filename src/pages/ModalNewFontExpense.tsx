@@ -1,16 +1,38 @@
 import React, { memo } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Input } from "../components";
+import { api } from "../services/api";
 
 type FormValue = {
     nameNewFontExpense: string;
 }
 
-const ModalNewFontExpense = ({statusModal, setStatusModal}:any) => {
+const ModalNewFontExpense = ({statusModal, setStatusModal, setStatusChanges, statusChanges }:any) => {
     const { register, handleSubmit } = useForm<FormValue>({ shouldUseNativeValidation: true });
 
-    const onSubmit:SubmitHandler<FormValue> = async (data) => {
-        console.log(data);
+    const onSubmit:SubmitHandler<FormValue> = async (data:FormValue) => {
+        if(!data.nameNewFontExpense){
+            alert('Preencha o campo corretamente!');
+        }
+        if(data.nameNewFontExpense.length > 1){
+            const newFontExpense = await api.post('/fontExpense/create', {
+                name: data.nameNewFontExpense
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': localStorage.getItem('@Auth:token')
+                }
+            })
+
+            if(newFontExpense.status == 200){
+                setStatusModal(false);
+                setStatusChanges(!statusChanges);
+            }else{
+                alert("Erro! Infelismente esse serviço não pode ser acessado no momento. \nTente mais tarde!");
+                setStatusModal(false);
+                setStatusChanges(!statusChanges);
+            }
+        }
     }
     
     if(!statusModal) return null;
