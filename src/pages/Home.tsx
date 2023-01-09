@@ -29,8 +29,7 @@ const Home = () => {
 
     const [dataUser, setDataUser] = useState<IDataUser | null>(null);
     const [dataFontExpense, setDataFontExpense] = useState([]);
-    const [fontExpenseSelected, setFontExpenseSelected] =
-        useState<String | null>(null);
+    const [fontExpenseSelected, setFontExpenseSelected] = useState<String | null>(null);
 
     const handleReadExpenses = async (idFontExepense: String) => {
         setLoading(true);
@@ -42,8 +41,7 @@ const Home = () => {
     };
 
     useEffect(() => {
-        const tokenUserStorage: string | null =
-            localStorage.getItem("@Auth:token");
+        const tokenUserStorage: string | null = localStorage.getItem("@Auth:token");
         const findDataUser = async () => {
             setLoading(true);
             try {
@@ -93,18 +91,56 @@ const Home = () => {
         allFontExpenses();
     }, [statusChanges]);
 
+    const paymentExpense = async (idExpense: string)  => {
+        setLoading(true);
+        
+        const tokenUserStorage: string | null = localStorage.getItem("@Auth:token");
+        try{
+            const payExpense = await api.get(`/expense/paid/${idExpense}`, {
+                headers: {
+                    Authorization: tokenUserStorage,
+                },
+            });
+    
+            if(payExpense.status == 200){
+                setStatusChanges(!statusChanges);
+            }
+
+        }catch(e:any){
+            if(e.response.status == 400){
+                setStatusChanges(!statusChanges);
+                alert('Balance lower than the expense price')
+                setLoading(false);
+                return;
+            }
+            
+            alert('Desculpe. Não foi possivel executar esta ação. \nTente novamente mais tarde.');
+        }
+
+        setLoading(false);
+    }
+
     const displayValue = (data: any) => {
+
         if (data.status === "Paid") {
             return (
                 <p className="mr-1 text-xl font-semibold text-green-500">
-                    + {data.value}
+                    {data.value}
                 </p>
             );
         }
         return (
-            <p className="mr-1 text-xl font-semibold text-red-500">
-                - {data.value}
-            </p>
+            <div className="flex items-center gap-2">
+                <p className="mr-1 text-xl font-semibold text-red-500">
+                    {data.value}
+                </p>
+                <button
+                    className="btn"
+                    onClick={() => paymentExpense(data._id)}
+                >
+                    Pay
+                </button>
+            </div>
         );
     };
 
