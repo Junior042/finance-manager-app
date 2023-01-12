@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ModalNewDeposit from "./ModalNewDeposit";
 import ModalNewExpense from "./ModalNewExpense";
 import ModalNewFontExpense from "./ModalNewFontExpense";
 import { api } from "../services/api";
+import { AuthContext } from "../context/AuthContext"; 
 import { getDataUser } from "../services/jwtFuncs";
 import jwt from "jsonwebtoken";
 
@@ -30,6 +31,8 @@ const Home = () => {
     const [dataUser, setDataUser] = useState<IDataUser | null>(null);
     const [dataFontExpense, setDataFontExpense] = useState([]);
     const [fontExpenseSelected, setFontExpenseSelected] = useState<String | null>(null);
+
+    const { singOut } = useContext(AuthContext);
 
     const handleReadExpenses = async (idFontExepense: String) => {
         setLoading(true);
@@ -166,7 +169,7 @@ const Home = () => {
                         New Deposit
                     </button>
                 </span>
-                <div className="flex gap-4">
+                <div className="flex gap-4 items-center">
                     <span>
                         <p className="font-bold">
                             Saldo:{" "}
@@ -184,6 +187,7 @@ const Home = () => {
                             </span>
                         </p>
                     </span>
+                    <button className="btn-full" onClick={() => singOut()}>Log Out</button>
                 </div>
             </header>
             <main className="grid justify-between grid-cols-[minmax(300px,_1fr)_1fr_1fr] mt-28">
