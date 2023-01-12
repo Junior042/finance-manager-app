@@ -34,13 +34,15 @@ const Home = () => {
 
     const { singOut } = useContext(AuthContext);
 
-    const handleReadExpenses = async (idFontExepense: String) => {
-        setLoading(true);
-        const allExpenses = await api.get(`/fontExpense/${idFontExepense}`);
-        // console.log(allExpenses.data.data.expenses)
-        setFontExpenseSelected(idFontExepense);
-        dataExpenses = allExpenses.data.data.expenses;
-        setLoading(false);
+    const handleReadExpenses = async (idFontExepense: String | null) => {
+        if(idFontExepense){
+            setLoading(true);
+            const allExpenses = await api.get(`/fontExpense/${idFontExepense}`);
+            // console.log(allExpenses.data.data.expenses)
+            setFontExpenseSelected(idFontExepense);
+            dataExpenses = allExpenses.data.data.expenses;
+            setLoading(false);
+        }
     };
 
     useEffect(() => {
@@ -107,6 +109,7 @@ const Home = () => {
     
             if(payExpense.status == 200){
                 setStatusChanges(!statusChanges);
+                handleReadExpenses(fontExpenseSelected);
             }
 
         }catch(e:any){

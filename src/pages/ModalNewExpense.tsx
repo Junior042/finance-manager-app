@@ -17,7 +17,7 @@ const ModalNewExpense = ({
     fontExpense,
     handleReadExpenses,
 }: any) => {
-    const { register, handleSubmit } = useForm<FormValue>({
+    const { register, handleSubmit, formState: {errors} } = useForm<FormValue>({
         shouldUseNativeValidation: true,
     });
 
@@ -69,25 +69,23 @@ const ModalNewExpense = ({
                         className="flex flex-col w-full gap-3"
                     >
                         <Input
-                            registerValue={{ ...register("nameNewExpense") }}
+                            register={{ ...register("nameNewExpense") }}
                             placeHolder={"Nome da despesa"}
                             typeInput={"text"}
                             maxValues={"100"}
-                            errorMessage={null}
                         />
+                        
                         <Input
-                            registerValue={{ ...register("totalPayable") }}
+                            register={{ ...register("totalPayable") }}
                             placeHolder={"Total a pagar"}
                             typeInput={"text"}
                             maxValues={"10"}
-                            errorMessage={null}
                         />
                         <Input
-                            registerValue={{ ...register("decription") }}
+                            register={{ ...register("decription") }}
                             placeHolder={"Descrição"}
                             typeInput={"text"}
                             maxValues={"60"}
-                            errorMessage={null}
                         />
                         <button type="submit" className="btn my-4 mx-auto">
                             Enviar
