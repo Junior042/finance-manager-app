@@ -1,11 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
-import ModalNewDeposit from "./ModalNewDeposit";
-import ModalNewExpense from "./ModalNewExpense";
-import ModalNewFontExpense from "./ModalNewFontExpense";
 import { api } from "../services/api";
 import { AuthContext } from "../context/AuthContext"; 
-import { getDataUser } from "../services/jwtFuncs";
-import jwt from "jsonwebtoken";
+import { useModalDeposit } from "../hooks/useModal";
+import { useModalNewFontExpense } from "../hooks/useModalNewFontExpense";
+import { useModalNewExpense } from "../hooks/useModalNewExpense";
 
 interface IDataUser {
     balance: string;
@@ -21,20 +19,20 @@ let dataExpenses: any = [];
 let render = 0;
 
 const Home = () => {
-    const [statusModalNewDeposit, setModalNewDeposit] = useState(false);
-    const [statusModalNewFontExpense, setModalNewFontExpense] = useState(false);
-    const [statusModalNewExpense, setModalNewExpense] = useState(false);
+    const { ModalDeposit, showModal } = useModalDeposit();
+    const { ModalNewFontExpense, showModalNewFontExpense } = useModalNewFontExpense();
+    const { ModalNewExpense, showModalNewExpense } = useModalNewExpense();
 
     const [statusChanges, setStatusChanges] = useState(true);
     const [loading, setLoading] = useState(true);
 
     const [dataUser, setDataUser] = useState<IDataUser | null>(null);
     const [dataFontExpense, setDataFontExpense] = useState([]);
-    const [fontExpenseSelected, setFontExpenseSelected] = useState<String | null>(null);
+    const [fontExpenseSelected, setFontExpenseSelected] = useState<string | null>(null);
 
     const { singOut } = useContext(AuthContext);
 
-    const handleReadExpenses = async (idFontExepense: String | null) => {
+    const handleReadExpenses = async (idFontExepense: string | null) => {
         if(idFontExepense){
             setLoading(true);
             const allExpenses = await api.get(`/fontExpense/${idFontExepense}`);
@@ -161,13 +159,15 @@ const Home = () => {
                     <h1 className="text-3xl font-bold">Despesas</h1>
                     <button
                         className="btn"
-                        onClick={() => setModalNewExpense(true)}
+                        // onClick={() => setModalNewExpense(true)}
+                        onClick={showModalNewExpense}
                     >
                         + Add New
                     </button>
                     <button
                         className="btn"
-                        onClick={() => setModalNewDeposit(true)}
+                        // onClick={() => setModalNewDeposit(true)}
+                        onClick={showModal}
                     >
                         New Deposit
                     </button>
@@ -177,7 +177,10 @@ const Home = () => {
                         <p className="font-bold">
                             Saldo:{" "}
                             <span className="text-green-400">
-                                R$: {dataUser ? dataUser.balance : "00.00"}
+                                R$:{" "}
+                                {dataUser
+                                    ? (+dataUser.balance).toFixed(2)
+                                    : "00.00"}
                             </span>
                         </p>
                     </span>
@@ -186,11 +189,15 @@ const Home = () => {
                             Total já depositado:{" "}
                             <span className="text-green-400">
                                 R$:{" "}
-                                {dataUser ? dataUser.totalDeposited : "00.00"}
+                                {dataUser
+                                    ? (+dataUser.totalDeposited).toFixed(2)
+                                    : "00.00"}
                             </span>
                         </p>
                     </span>
-                    <button className="btn-full" onClick={() => singOut()}>Log Out</button>
+                    <button className="btn-full" onClick={() => singOut()}>
+                        Log Out
+                    </button>
                 </div>
             </header>
             <main className="grid justify-between grid-cols-[minmax(300px,_1fr)_1fr_1fr] mt-28">
@@ -230,7 +237,8 @@ const Home = () => {
                     </ul>
                     <button
                         className="btn-no-border"
-                        onClick={() => setModalNewFontExpense(true)}
+                        // onClick={() => setModalNewFontExpense(true)}
+                        onClick={showModalNewFontExpense}
                     >
                         + Add New
                     </button>
@@ -280,27 +288,28 @@ const Home = () => {
                 </section>
             </main>
 
-            <ModalNewDeposit
-                statusModal={statusModalNewDeposit}
-                setStatusModal={setModalNewDeposit}
-                setStatusChanges={setStatusChanges}
-                statusChanges={statusChanges}
-            />
-            <ModalNewFontExpense
-                statusModal={statusModalNewFontExpense}
-                setStatusModal={setModalNewFontExpense}
-                setStatusChanges={setStatusChanges}
-                statusChanges={statusChanges}
-                handleReadExpenses={handleReadExpenses}
-            />
-            <ModalNewExpense
-                statusModal={statusModalNewExpense}
-                setStatusModal={setModalNewExpense}
-                setStatusChanges={setStatusChanges}
-                statusChanges={statusChanges}
-                fontExpense={fontExpenseSelected}
-                handleReadExpenses={handleReadExpenses}
-            />
+            {ModalDeposit ? (
+                <ModalDeposit
+                    setStatusChanges={setStatusChanges}
+                    statusChanges={statusChanges}
+                />
+            ) : null}
+
+            {ModalNewFontExpense ? (
+                <ModalNewFontExpense 
+                    setStatusChanges={setStatusChanges}
+                    statusChanges={statusChanges}
+                />
+            ) : null}
+
+            {ModalNewExpense ? (
+                <ModalNewExpense 
+                    setStatusChanges={setStatusChanges}
+                    statusChanges={statusChanges}
+                    fontExpense={fontExpenseSelected}
+                    handleReadExpenses={handleReadExpenses}
+                />
+            ) : null}
         </>
     );
 };

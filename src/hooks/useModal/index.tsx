@@ -1,41 +1,38 @@
-import React, { memo } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { Input } from "../components";
-import { api } from "../services/api";
+import React, { useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { Input } from '../../components';
+import { api } from '../../services/api';
 
 type FormValue = {
-    nameNewFontExpense: string;
+    newDeposit: string;
 };
 
-const ModalNewFontExpense = ({
-    statusModal,
-    setStatusModal,
-    setStatusChanges,
-    statusChanges,
-}: any) => {
+export const useModalDeposit = () => {
+    const [statusModal, setStatusModal] = useState(false);
+
     const { register, handleSubmit } = useForm<FormValue>({
         shouldUseNativeValidation: true,
     });
-
-    const onSubmit: SubmitHandler<FormValue> = async (data: FormValue) => {
-        if (!data.nameNewFontExpense) {
-            alert("Preencha o campo corretamente!");
-        }
-        if (data.nameNewFontExpense.length > 1) {
-            const newFontExpense = await api.post(
-                "/fontExpense/create",
+    
+    
+    const Modal = ({ setStatusChanges, statusChanges }:any) => {
+        const onSubmit: SubmitHandler<FormValue> = async (data: FormValue) => {
+            const newValueDepositUser = data.newDeposit.replace(",", ".");
+            const newDepositUser = await api.post(
+                "/user/deposit",
                 {
-                    name: data.nameNewFontExpense,
+                    newValueDeposit: newValueDepositUser,
                 },
                 {
                     headers: {
                         "Content-Type": "application/json",
-                        Authorization: localStorage.getItem("@Auth:token"),
+                        // 'Accept': 'application/json',
+                        Authorization: `${localStorage.getItem("@Auth:token")}`,
                     },
                 }
             );
-
-            if (newFontExpense.status == 200) {
+    
+            if (newDepositUser.status == 200) {
                 setStatusModal(false);
                 setStatusChanges(!statusChanges);
             } else {
@@ -45,11 +42,9 @@ const ModalNewFontExpense = ({
                 setStatusModal(false);
                 setStatusChanges(!statusChanges);
             }
-        }
-    };
+        };
+    
 
-    if (!statusModal) return null;
-    else {
         return (
             <div className="z-50 bg-glass absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center">
                 <div className="flex flex-col items-end bg-gray-200 w-[374px] p-2">
@@ -64,20 +59,23 @@ const ModalNewFontExpense = ({
                         className="flex flex-col w-full"
                     >
                         <Input
-                            register={{ ...register("nameNewFontExpense") }}
-                            placeHolder={"Fonte da despesa"}
+                            register={{ ...register("newDeposit") }}
+                            placeHolder={"Valor do deposito"}
                             typeInput={"text"}
-                            maxValues={"100"}
+                            maxValues={"11"}
                             errorMessage={null}
                         />
                         <button type="submit" className="btn my-4 mx-auto">
-                            Enviar
+                            Depositar
                         </button>
                     </form>
                 </div>
             </div>
         );
     }
-};
 
-export default ModalNewFontExpense;
+    return {
+        ModalDeposit: statusModal ? Modal : null,
+        showModal: () => setStatusModal(true)
+    }
+}

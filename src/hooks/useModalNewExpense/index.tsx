@@ -1,7 +1,7 @@
-import React from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { Input } from "../components";
-import { api } from "../services/api";
+import React, { useState } from 'react';
+import { SubmitHandler, useForm } from 'react-hook-form';
+import { Input } from '../../components';
+import { api } from '../../services/api';
 
 type FormValue = {
     nameNewExpense: string;
@@ -9,52 +9,46 @@ type FormValue = {
     decription: string;
 };
 
-const ModalNewExpense = ({
-    statusModal,
-    setStatusModal,
-    setStatusChanges,
-    statusChanges,
-    fontExpense,
-    handleReadExpenses,
-}: any) => {
-    const { register, handleSubmit, formState: {errors} } = useForm<FormValue>({
+export const useModalNewExpense = () => {
+    const [statusModal, setStatusModal] = useState(false);
+
+    const { register, handleSubmit } = useForm<FormValue>({
         shouldUseNativeValidation: true,
     });
+    
+    const Modal = ({ setStatusChanges, statusChanges, fontExpense, handleReadExpenses }:any) => {
+        const onSubmit: SubmitHandler<FormValue> = async (data: FormValue) => {
+            const totalPayable = data.totalPayable.replace(",", ".");
 
-    const onSubmit: SubmitHandler<FormValue> = async (data: FormValue) => {
-        const totalPayable = data.totalPayable.replace(",", ".");
-
-        const newExpense = await api.post(
-            "/expense/create",
-            {
-                name: data.nameNewExpense,
-                value: totalPayable,
-                description: data.decription,
-                fontExpenseId: fontExpense,
-            },
-            {
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: localStorage.getItem("@Auth:token"),
+            const newExpense = await api.post(
+                "/expense/create",
+                {
+                    name: data.nameNewExpense,
+                    value: totalPayable,
+                    description: data.decription,
+                    fontExpenseId: fontExpense,
                 },
-            }
-        );
-
-        if (newExpense.status == 200) {
-            handleReadExpenses(fontExpense);
-            setStatusModal(false);
-            setStatusChanges(!statusChanges);
-        } else {
-            alert(
-                "Erro! Infelismente esse serviço não pode ser acessado no momento. \nTente mais tarde!"
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: localStorage.getItem("@Auth:token"),
+                    },
+                }
             );
-            setStatusModal(false);
-            setStatusChanges(!statusChanges);
-        }
-    };
 
-    if (!statusModal) return null;
-    else {
+            if (newExpense.status == 200) {
+                handleReadExpenses(fontExpense);
+                setStatusModal(false);
+                setStatusChanges(!statusChanges);
+            } else {
+                alert(
+                    "Erro! Infelismente esse serviço não pode ser acessado no momento. \nTente mais tarde!"
+                );
+                setStatusModal(false);
+                setStatusChanges(!statusChanges);
+            }
+        };
+
         return (
             <div className="z-50 bg-glass absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center">
                 <div className="flex flex-col items-end bg-gray-200 w-[374px] p-2">
@@ -95,6 +89,9 @@ const ModalNewExpense = ({
             </div>
         );
     }
-};
 
-export default ModalNewExpense;
+    return {
+        ModalNewExpense: statusModal ? Modal : null,
+        showModalNewExpense: () => setStatusModal(true)
+    }
+}
